@@ -8,174 +8,174 @@
 </head>
 <body>
 
-<!-- ── Title Bar ─────────────────────────────────── -->
+<!-- Title Bar -->
 <div class="titlebar">
   <div class="titlebar-title">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
     Bark Push
   </div>
   <div class="titlebar-controls">
-    <button class="titlebar-btn" id="btn-minimize" title="Minimize">
+    <button class="titlebar-btn" id="btn-minimize" title="最小化">
       <svg width="12" height="12" viewBox="0 0 12 12"><line x1="1" y1="6" x2="11" y2="6" stroke="currentColor" stroke-width="1.5"/></svg>
     </button>
-    <button class="titlebar-btn" id="btn-maximize" title="Maximize">
+    <button class="titlebar-btn" id="btn-maximize" title="最大化">
       <svg width="12" height="12" viewBox="0 0 12 12"><rect x="1" y="1" width="10" height="10" rx="1" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>
     </button>
-    <button class="titlebar-btn close" id="btn-close" title="Close">
+    <button class="titlebar-btn close" id="btn-close" title="关闭">
       <svg width="12" height="12" viewBox="0 0 12 12"><line x1="2" y1="2" x2="10" y2="10" stroke="currentColor" stroke-width="1.5"/><line x1="10" y1="2" x2="2" y2="10" stroke="currentColor" stroke-width="1.5"/></svg>
     </button>
   </div>
 </div>
 
-<!-- ── App Layout ────────────────────────────────── -->
-<div class="app">
+<!-- App Layout -->
+<div class="app" id="app-root">
   <!-- Sidebar -->
   <nav class="sidebar">
     <div class="sidebar-header">
-      <h2>Navigation</h2>
+      <h2>导航</h2>
     </div>
     <div class="nav">
       <button class="nav-item active" data-page="push">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2L11 13"/><path d="M22 2L15 22L11 13L2 9L22 2Z"/></svg>
-        Push
+        推送
       </button>
       <button class="nav-item" data-page="devices">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
-        Devices
+        设备管理
       </button>
       <button class="nav-item" data-page="history">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-        History
+        推送记录
       </button>
       <button class="nav-item" data-page="encrypt">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-        Encrypt
+        加密工具
       </button>
       <button class="nav-item" data-page="settings">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-        Settings
+        设置
       </button>
     </div>
     <div class="sidebar-footer">
-      <div class="device-count" id="device-count">No devices</div>
+      <div class="device-count" id="device-count">暂无设备</div>
     </div>
   </nav>
 
   <!-- Main Content -->
   <main class="main">
 
-    <!-- ══ PUSH PAGE ═══════════════════════════════ -->
+    <!-- PUSH PAGE -->
     <div class="page active" id="page-push">
       <div class="page-header">
-        <h1>Send Push</h1>
-        <p>Send push notifications to your devices via Bark</p>
+        <h1>发送推送</h1>
+        <p>通过 Bark 向你的设备发送推送通知</p>
       </div>
 
       <div class="card">
         <div class="card-header">
-          <h3>Select Devices</h3>
-          <p>Choose which devices to send the notification to</p>
+          <h3>选择设备</h3>
+          <p>选择要发送通知的设备（支持多选）</p>
         </div>
         <div class="select-all-row">
           <input type="checkbox" id="select-all-devices">
-          <label for="select-all-devices">Select all</label>
+          <label for="select-all-devices">全选</label>
         </div>
         <div class="push-device-selector" id="push-device-list">
-          <div class="empty-state">
-            <p>No devices configured yet. Add a device first.</p>
+          <div class="empty-state" style="padding:12px">
+            <p>暂无设备，请先添加设备</p>
           </div>
         </div>
       </div>
 
       <div class="card">
         <div class="card-header">
-          <h3>Message</h3>
-          <p>Compose your notification content</p>
+          <h3>消息内容</h3>
+          <p>编写通知内容</p>
         </div>
         <div class="form-group">
-          <label class="form-label">Title</label>
-          <input type="text" class="form-input" id="push-title" placeholder="Notification title">
+          <label class="form-label">标题</label>
+          <input type="text" class="form-input" id="push-title" placeholder="通知标题">
         </div>
         <div class="form-group">
-          <label class="form-label">Subtitle</label>
-          <input type="text" class="form-input" id="push-subtitle" placeholder="Optional subtitle">
+          <label class="form-label">副标题</label>
+          <input type="text" class="form-input" id="push-subtitle" placeholder="可选副标题">
         </div>
         <div class="form-group">
-          <label class="form-label">Body *</label>
-          <textarea class="form-textarea" id="push-body" placeholder="Notification content. Use \n for line breaks." rows="4"></textarea>
+          <label class="form-label">正文 *</label>
+          <textarea class="form-textarea" id="push-body" placeholder="通知正文内容，使用 \n 换行" rows="4"></textarea>
         </div>
       </div>
 
       <div class="card">
         <div class="card-header">
-          <h3>Options</h3>
-          <p>Configure notification behavior</p>
+          <h3>高级选项</h3>
+          <p>配置通知行为</p>
         </div>
         <div class="form-row">
           <div class="form-group">
-            <label class="form-label">URL</label>
+            <label class="form-label">跳转 URL</label>
             <input type="text" class="form-input" id="push-url" placeholder="https://example.com">
-            <div class="form-hint">Open URL when tapped</div>
+            <div class="form-hint">点击通知后打开的链接</div>
           </div>
           <div class="form-group">
-            <label class="form-label">Copy</label>
-            <input type="text" class="form-input" id="push-copy" placeholder="Text to copy">
-            <div class="form-hint">Copy to clipboard</div>
+            <label class="form-label">复制内容</label>
+            <input type="text" class="form-input" id="push-copy" placeholder="要复制到剪贴板的文字">
+            <div class="form-hint">自动复制到剪贴板</div>
           </div>
         </div>
         <div class="form-row">
           <div class="form-group">
-            <label class="form-label">Sound</label>
+            <label class="form-label">铃声</label>
             <select class="form-select" id="push-sound">
-              <option value="">Default</option>
-              <option value="birdsong">birdsong</option>
+              <option value="">默认</option>
+              <option value="birdsong">birdsong（鸟鸣）</option>
               <option value="birdsong2">birdsong2</option>
-              <option value="alarm">alarm</option>
-              <option value="bell">bell</option>
-              <option value="bubble">bubble</option>
-              <option value="cashregister">cashregister</option>
-              <option value="electronic">electronic</option>
-              <option value="falling">falling</option>
-              <option value="gotosleep">gotosleep</option>
-              <option value="healthnotification">healthnotification</option>
-              <option value="horn">horn</option>
+              <option value="alarm">alarm（闹钟）</option>
+              <option value="bell">bell（铃声）</option>
+              <option value="bubble">bubble（气泡）</option>
+              <option value="cashregister">cashregister（收银机）</option>
+              <option value="electronic">electronic（电子音）</option>
+              <option value="falling">falling（坠落）</option>
+              <option value="gotosleep">gotosleep（睡眠）</option>
+              <option value="healthnotification">healthnotification（健康）</option>
+              <option value="horn">horn（号角）</option>
               <option value="lalala">lalala</option>
               <option value="multiway_invitation">multiway_invitation</option>
-              <option value="newemail">newemail</option>
-              <option value="newsflash">newsflash</option>
-              <option value="silence">silence</option>
-              <option value="success">success</option>
-              <option value="system">system</option>
-              <option value="telephone">telephone</option>
-              <option value="tinkling">tinkling</option>
+              <option value="newemail">newemail（新邮件）</option>
+              <option value="newsflash">newsflash（快讯）</option>
+              <option value="silence">silence（静音）</option>
+              <option value="success">success（成功）</option>
+              <option value="system">system（系统）</option>
+              <option value="telephone">telephone（电话）</option>
+              <option value="tinkling">tinkling（叮当）</option>
             </select>
           </div>
           <div class="form-group">
-            <label class="form-label">Level</label>
+            <label class="form-label">通知级别</label>
             <select class="form-select" id="push-level">
-              <option value="">Default (active)</option>
-              <option value="active">active</option>
-              <option value="timeSensitive">timeSensitive</option>
-              <option value="critical">critical</option>
-              <option value="passive">passive</option>
+              <option value="">默认（active）</option>
+              <option value="active">active - 立即亮屏显示</option>
+              <option value="timeSensitive">timeSensitive - 时效性通知</option>
+              <option value="critical">critical - 紧急通知（忽略静音）</option>
+              <option value="passive">passive - 静默通知</option>
             </select>
           </div>
         </div>
         <div class="form-row">
           <div class="form-group">
-            <label class="form-label">Group</label>
-            <input type="text" class="form-input" id="push-group" placeholder="Notification group">
+            <label class="form-label">分组</label>
+            <input type="text" class="form-input" id="push-group" placeholder="通知分组名称">
           </div>
           <div class="form-group">
-            <label class="form-label">Icon</label>
+            <label class="form-label">自定义图标</label>
             <input type="text" class="form-input" id="push-icon" placeholder="https://example.com/icon.png">
-            <div class="form-hint">Custom icon URL (iOS 15+)</div>
+            <div class="form-hint">自定义图标 URL（iOS 15+）</div>
           </div>
         </div>
         <div class="form-group">
           <label class="form-label" style="display:flex;align-items:center;gap:8px;cursor:pointer">
             <input type="checkbox" id="push-call" style="width:14px;height:14px;">
-            Call mode (ring for 30 seconds)
+            来电模式（持续响铃 30 秒）
           </label>
         </div>
       </div>
@@ -183,47 +183,47 @@
       <div class="btn-group">
         <button class="btn btn-primary" id="btn-send-push">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2L11 13"/><path d="M22 2L15 22L11 13L2 9L22 2Z"/></svg>
-          Send Push
+          发送推送
         </button>
-        <button class="btn" id="btn-clear-push">Clear</button>
+        <button class="btn" id="btn-clear-push">清空</button>
       </div>
     </div>
 
-    <!-- ══ DEVICES PAGE ════════════════════════════ -->
+    <!-- DEVICES PAGE -->
     <div class="page" id="page-devices">
       <div class="page-header">
-        <h1>Devices</h1>
-        <p>Manage your Bark device keys</p>
+        <h1>设备管理</h1>
+        <p>管理你的 Bark 设备密钥</p>
       </div>
 
       <button class="btn btn-primary" id="btn-add-device" style="margin-bottom:16px">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-        Add Device
+        添加设备
       </button>
 
       <div class="device-list" id="device-list">
         <div class="empty-state">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
-          <h3>No devices</h3>
-          <p>Add a Bark device to get started</p>
+          <h3>暂无设备</h3>
+          <p>添加一个 Bark 设备即可开始使用</p>
         </div>
       </div>
     </div>
 
-    <!-- ══ HISTORY PAGE ════════════════════════════ -->
+    <!-- HISTORY PAGE -->
     <div class="page" id="page-history">
       <div class="page-header">
-        <h1>History</h1>
-        <p>View your push notification history</p>
+        <h1>推送记录</h1>
+        <p>查看历史推送通知记录</p>
       </div>
 
       <div class="btn-group" style="margin-bottom:16px;margin-top:0">
         <select class="form-select" id="history-filter" style="width:200px">
-          <option value="">All devices</option>
+          <option value="">全部设备</option>
         </select>
         <button class="btn btn-destructive btn-sm" id="btn-clear-history">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
-          Clear History
+          清空记录
         </button>
       </div>
 
@@ -231,17 +231,17 @@
         <table class="history-table">
           <thead>
             <tr>
-              <th>Status</th>
-              <th>Title</th>
-              <th>Body</th>
-              <th>Time</th>
+              <th>状态</th>
+              <th>标题</th>
+              <th>内容</th>
+              <th>时间</th>
             </tr>
           </thead>
           <tbody id="history-body">
             <tr>
               <td colspan="4">
                 <div class="empty-state" style="padding:30px">
-                  <p>No push history</p>
+                  <p>暂无推送记录</p>
                 </div>
               </td>
             </tr>
@@ -250,79 +250,79 @@
       </div>
     </div>
 
-    <!-- ══ ENCRYPT PAGE ════════════════════════════ -->
+    <!-- ENCRYPT PAGE -->
     <div class="page" id="page-encrypt">
       <div class="page-header">
-        <h1>Encryption</h1>
-        <p>Encrypt and decrypt push messages using AES-256-CBC</p>
+        <h1>加密工具</h1>
+        <p>使用 AES-256-CBC 算法加密和解密推送消息</p>
       </div>
 
       <div class="card">
         <div class="card-header">
-          <h3>Encrypt</h3>
-          <p>Encrypt a message with your key</p>
+          <h3>加密</h3>
+          <p>使用密钥加密消息内容</p>
         </div>
         <div class="form-group">
-          <label class="form-label">Plaintext</label>
-          <textarea class="form-textarea" id="enc-plaintext" placeholder="Enter text to encrypt" rows="3"></textarea>
+          <label class="form-label">明文</label>
+          <textarea class="form-textarea" id="enc-plaintext" placeholder="输入要加密的文本" rows="3"></textarea>
         </div>
         <div class="form-group">
-          <label class="form-label">Encryption Key</label>
-          <input type="password" class="form-input" id="enc-key" placeholder="Enter encryption key">
+          <label class="form-label">加密密钥</label>
+          <input type="password" class="form-input" id="enc-key" placeholder="输入加密密钥">
         </div>
         <button class="btn btn-primary" id="btn-encrypt">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-          Encrypt
+          加密
         </button>
         <div class="encrypt-result" id="enc-result" style="display:none"></div>
         <button class="btn btn-sm" id="btn-copy-encrypted" style="margin-top:8px;display:none">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
-          Copy
+          复制结果
         </button>
       </div>
 
       <div class="card">
         <div class="card-header">
-          <h3>Decrypt</h3>
-          <p>Decrypt a base64-encoded ciphertext</p>
+          <h3>解密</h3>
+          <p>解密 Base64 编码的密文</p>
         </div>
         <div class="form-group">
-          <label class="form-label">Ciphertext (Base64)</label>
-          <textarea class="form-textarea" id="dec-ciphertext" placeholder="Enter base64 ciphertext" rows="3"></textarea>
+          <label class="form-label">密文（Base64）</label>
+          <textarea class="form-textarea" id="dec-ciphertext" placeholder="输入 Base64 密文" rows="3"></textarea>
         </div>
         <div class="form-group">
-          <label class="form-label">Decryption Key</label>
-          <input type="password" class="form-input" id="dec-key" placeholder="Enter decryption key">
+          <label class="form-label">解密密钥</label>
+          <input type="password" class="form-input" id="dec-key" placeholder="输入解密密钥">
         </div>
         <button class="btn btn-primary" id="btn-decrypt">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-          Decrypt
+          解密
         </button>
         <div class="encrypt-result" id="dec-result" style="display:none"></div>
       </div>
     </div>
 
-    <!-- ══ SETTINGS PAGE ═══════════════════════════ -->
+    <!-- SETTINGS PAGE -->
     <div class="page" id="page-settings">
       <div class="page-header">
-        <h1>Settings</h1>
-        <p>Configure default push options</p>
+        <h1>设置</h1>
+        <p>配置默认推送选项</p>
       </div>
 
       <div class="card">
         <div class="card-header">
-          <h3>Defaults</h3>
-          <p>Default values for new push messages</p>
+          <h3>默认值</h3>
+          <p>新推送消息的默认参数</p>
         </div>
         <div class="form-row">
           <div class="form-group">
-            <label class="form-label">Default Server</label>
+            <label class="form-label">默认服务器</label>
             <input type="text" class="form-input" id="set-server" placeholder="https://api.day.app">
           </div>
           <div class="form-group">
-            <label class="form-label">Default Sound</label>
+            <label class="form-label">默认铃声</label>
             <select class="form-select" id="set-sound">
-              <option value="">Default</option>
+              <option value="">默认</option>
               <option value="birdsong">birdsong</option>
               <option value="birdsong2">birdsong2</option>
               <option value="alarm">alarm</option>
@@ -335,7 +335,7 @@
         </div>
         <div class="form-row">
           <div class="form-group">
-            <label class="form-label">Default Level</label>
+            <label class="form-label">默认通知级别</label>
             <select class="form-select" id="set-level">
               <option value="active">active</option>
               <option value="timeSensitive">timeSensitive</option>
@@ -344,28 +344,28 @@
             </select>
           </div>
           <div class="form-group">
-            <label class="form-label">Default Group</label>
-            <input type="text" class="form-input" id="set-group" placeholder="Default group name">
+            <label class="form-label">默认分组</label>
+            <input type="text" class="form-input" id="set-group" placeholder="默认分组名称">
           </div>
         </div>
       </div>
 
       <div class="card">
         <div class="card-header">
-          <h3>Behavior</h3>
-          <p>Application behavior settings</p>
+          <h3>行为设置</h3>
+          <p>应用行为相关设置</p>
         </div>
         <div class="setting-item">
           <div class="setting-info">
-            <h4>Auto Copy</h4>
-            <p>Automatically copy response to clipboard</p>
+            <h4>自动复制</h4>
+            <p>发送推送后自动复制内容到剪贴板</p>
           </div>
           <div class="toggle active" id="set-autocopy"></div>
         </div>
         <div class="setting-item">
           <div class="setting-info">
-            <h4>Save History</h4>
-            <p>Save push notification history locally</p>
+            <h4>保存记录</h4>
+            <p>在本地保存推送历史记录</p>
           </div>
           <div class="toggle active" id="set-savehistory"></div>
         </div>
@@ -373,51 +373,51 @@
 
       <button class="btn btn-primary" id="btn-save-settings">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
-        Save Settings
+        保存设置
       </button>
     </div>
 
   </main>
 </div>
 
-<!-- ── Device Modal ──────────────────────────────── -->
+<!-- Device Modal -->
 <div class="modal-overlay" id="device-modal">
   <div class="modal">
     <div class="modal-header">
-      <h2 id="modal-title">Add Device</h2>
-      <p>Configure a Bark device for push notifications</p>
+      <h2 id="modal-title">添加设备</h2>
+      <p>配置一个 Bark 设备用于推送通知</p>
     </div>
     <div class="form-group">
-      <label class="form-label">Device Name *</label>
-      <input type="text" class="form-input" id="modal-name" placeholder="My iPhone">
+      <label class="form-label">设备名称 *</label>
+      <input type="text" class="form-input" id="modal-name" placeholder="我的 iPhone">
     </div>
     <div class="form-group">
-      <label class="form-label">Device Key *</label>
-      <input type="text" class="form-input" id="modal-key" placeholder="Your Bark device key">
-      <div class="form-hint">Found in the Bark app: tap to copy the key</div>
+      <label class="form-label">设备密钥 *</label>
+      <input type="text" class="form-input" id="modal-key" placeholder="你的 Bark 设备密钥">
+      <div class="form-hint">在 Bark 应用中点击即可复制密钥</div>
     </div>
     <div class="form-group">
-      <label class="form-label">Server URL</label>
+      <label class="form-label">服务器地址</label>
       <input type="text" class="form-input" id="modal-server" placeholder="https://api.day.app">
-      <div class="form-hint">Leave empty for the default Bark server</div>
+      <div class="form-hint">留空则使用默认 Bark 服务器</div>
     </div>
     <div class="form-group">
-      <label class="form-label">Encryption Key (optional)</label>
-      <input type="password" class="form-input" id="modal-encrypt-key" placeholder="AES encryption key">
-      <div class="form-hint">If set, messages will be encrypted before sending</div>
+      <label class="form-label">加密密钥（可选）</label>
+      <input type="password" class="form-input" id="modal-encrypt-key" placeholder="AES 加密密钥">
+      <div class="form-hint">设置后将自动加密消息再发送</div>
     </div>
     <div class="modal-footer">
-      <button class="btn" id="modal-cancel">Cancel</button>
+      <button class="btn" id="modal-cancel">取消</button>
       <button class="btn" id="modal-test">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
-        Test
+        测试
       </button>
-      <button class="btn btn-primary" id="modal-save">Save</button>
+      <button class="btn btn-primary" id="modal-save">保存</button>
     </div>
   </div>
 </div>
 
-<!-- ── Toast Container ───────────────────────────── -->
+<!-- Toast Container -->
 <div class="toast-container" id="toast-container"></div>
 
 <script src="js/app.js"></script>
