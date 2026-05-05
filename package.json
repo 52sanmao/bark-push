@@ -1,0 +1,13 @@
+{
+  "name": "bark-push",
+  "version": "1.0.2",
+  "description": "Bark Push Notification Desktop Client",
+  "scripts": {
+    "tauri": "tauri",
+    "dev": "tauri dev",
+    "build": "tauri build"
+  },
+  "devDependencies": {
+    "@tauri-apps/cli": "^2"
+  }
+}

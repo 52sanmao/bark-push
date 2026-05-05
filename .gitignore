@@ -1,0 +1,5 @@
+node_modules/
+src-tauri/target/
+gen_icons.py
+.DS_Store
+Thumbs.db

@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bark Push</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div class="titlebar">
+  <div class="titlebar-title">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+    Bark Push
+  </div>
+  <div class="titlebar-controls">
+    <button class="titlebar-btn" id="btn-minimize"><svg width="12" height="12" viewBox="0 0 12 12"><line x1="1" y1="6" x2="11" y2="6" stroke="currentColor" stroke-width="1.5"/></svg></button>
+    <button class="titlebar-btn" id="btn-maximize"><svg width="12" height="12" viewBox="0 0 12 12"><rect x="1" y="1" width="10" height="10" rx="1" fill="none" stroke="currentColor" stroke-width="1.5"/></svg></button>
+    <button class="titlebar-btn close" id="btn-close"><svg width="12" height="12" viewBox="0 0 12 12"><line x1="2" y1="2" x2="10" y2="10" stroke="currentColor" stroke-width="1.5"/><line x1="10" y1="2" x2="2" y2="10" stroke="currentColor" stroke-width="1.5"/></svg></button>
+  </div>
+</div>
+<div class="app">
+  <nav class="sidebar">
+    <div class="sidebar-header"><h2>导航</h2></div>
+    <div class="nav" id="nav">
+      <button class="nav-item active" onclick="goTo('push',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2L11 13"/><path d="M22 2L15 22L11 13L2 9L22 2Z"/></svg>推送</button>
+      <button class="nav-item" onclick="goTo('devices',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>设备管理</button>
+      <button class="nav-item" onclick="goTo('history',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>推送记录</button>
+      <button class="nav-item" onclick="goTo('encrypt',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>加密工具</button>
+      <button class="nav-item" onclick="goTo('settings',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>设置</button>
+    </div>
+    <div class="sidebar-footer"><div class="device-count" id="device-count">暂无设备</div></div>
+  </nav>
+  <main class="main" id="main">
+    <!-- PUSH -->
+    <div class="page active" id="page-push">
+      <div class="page-header"><h1>发送推送</h1><p>通过 Bark 向你的设备发送推送通知</p></div>
+      <div class="card">
+        <div class="card-header"><h3>选择设备</h3><p>选择要发送通知的设备（支持多选）</p></div>
+        <div style="margin-bottom:8px"><label style="font-size:12px;color:var(--muted-foreground);cursor:pointer"><input type="checkbox" id="select-all-devices" onchange="toggleAllDevices(this.checked)"> 全选</label></div>
+        <div id="push-device-list" class="push-device-selector"></div>
+      </div>
+      <div class="card">
+        <div class="card-header"><h3>消息内容</h3></div>
+        <div class="form-group"><label class="form-label">标题</label><input type="text" class="form-input" id="push-title" placeholder="通知标题"></div>
+        <div class="form-group"><label class="form-label">副标题</label><input type="text" class="form-input" id="push-subtitle" placeholder="可选副标题"></div>
+        <div class="form-group"><label class="form-label">正文 *</label><textarea class="form-textarea" id="push-body" placeholder="通知正文" rows="3"></textarea></div>
+      </div>
+      <div class="card">
+        <div class="card-header"><h3>高级选项</h3></div>
+        <div class="form-row">
+          <div class="form-group"><label class="form-label">跳转 URL</label><input type="text" class="form-input" id="push-url" placeholder="https://example.com"><div class="form-hint">点击通知后打开的链接</div></div>
+          <div class="form-group"><label class="form-label">复制内容</label><input type="text" class="form-input" id="push-copy" placeholder="自动复制到剪贴板"></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label class="form-label">铃声</label>
+            <select class="form-select" id="push-sound"><option value="">默认</option><option value="birdsong">birdsong</option><option value="birdsong2">birdsong2</option><option value="alarm">alarm</option><option value="bell">bell</option><option value="bubble">bubble</option><option value="cashregister">cashregister</option><option value="electronic">electronic</option><option value="falling">falling</option><option value="gotosleep">gotosleep</option><option value="horn">horn</option><option value="newemail">newemail</option><option value="newsflash">newsflash</option><option value="silence">silence</option><option value="success">success</option><option value="system">system</option><option value="telephone">telephone</option></select>
+          </div>
+          <div class="form-group"><label class="form-label">通知级别</label>
+            <select class="form-select" id="push-level"><option value="">默认(active)</option><option value="active">active - 立即亮屏</option><option value="timeSensitive">timeSensitive - 时效性</option><option value="critical">critical - 紧急(忽略静音)</option><option value="passive">passive - 静默</option></select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label class="form-label">分组</label><input type="text" class="form-input" id="push-group" placeholder="通知分组"></div>
+          <div class="form-group"><label class="form-label">图标 URL</label><input type="text" class="form-input" id="push-icon" placeholder="https://example.com/icon.png"></div>
+        </div>
+        <div class="form-group"><label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px"><input type="checkbox" id="push-call" style="width:14px;height:14px"> 来电模式（持续响铃30秒）</label></div>
+      </div>
+      <div class="btn-group"><button class="btn btn-primary" id="btn-send-push" onclick="sendPush()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2L11 13"/><path d="M22 2L15 22L11 13L2 9L22 2Z"/></svg>发送推送</button><button class="btn" onclick="clearPush()">清空</button></div>
+    </div>
+    <!-- DEVICES -->
+    <div class="page" id="page-devices">
+      <div class="page-header"><h1>设备管理</h1><p>管理你的 Bark 设备密钥</p></div>
+      <button class="btn btn-primary" onclick="showAddModal()" style="margin-bottom:16px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>添加设备</button>
+      <div id="device-list" class="device-list"></div>
+    </div>
+    <!-- HISTORY -->
+    <div class="page" id="page-history">
+      <div class="page-header"><h1>推送记录</h1><p>查看历史推送记录</p></div>
+      <div class="btn-group" style="margin:0 0 16px 0">
+        <select class="form-select" id="history-filter" onchange="loadHistory()" style="width:200px"><option value="">全部设备</option></select>
+        <button class="btn btn-destructive btn-sm" onclick="clearHistory()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>清空记录</button>
+      </div>
+      <div class="card" style="padding:0;overflow:hidden"><table class="history-table"><thead><tr><th>状态</th><th>标题</th><th>内容</th><th>时间</th></tr></thead><tbody id="history-body"><tr><td colspan="4"><div class="empty-state" style="padding:30px"><p>暂无推送记录</p></div></td></tr></tbody></table></div>
+    </div>
+    <!-- ENCRYPT -->
+    <div class="page" id="page-encrypt">
+      <div class="page-header"><h1>加密工具</h1><p>AES-256-CBC 加密/解密</p></div>
+      <div class="card">
+        <div class="card-header"><h3>加密</h3></div>
+        <div class="form-group"><label class="form-label">明文</label><textarea class="form-textarea" id="enc-plaintext" placeholder="输入要加密的文本" rows="3"></textarea></div>
+        <div class="form-group"><label class="form-label">密钥</label><input type="password" class="form-input" id="enc-key" placeholder="输入加密密钥"></div>
+        <button class="btn btn-primary" onclick="doEncrypt()">加密</button>
+        <div class="encrypt-result" id="enc-result" style="display:none"></div>
+        <button class="btn btn-sm" id="btn-copy-enc" style="display:none;margin-top:8px" onclick="copyEncResult()">复制结果</button>
+      </div>
+      <div class="card">
+        <div class="card-header"><h3>解密</h3></div>
+        <div class="form-group"><label class="form-label">密文(Base64)</label><textarea class="form-textarea" id="dec-ciphertext" placeholder="输入 Base64 密文" rows="3"></textarea></div>
+        <div class="form-group"><label class="form-label">密钥</label><input type="password" class="form-input" id="dec-key" placeholder="输入解密密钥"></div>
+        <button class="btn btn-primary" onclick="doDecrypt()">解密</button>
+        <div class="encrypt-result" id="dec-result" style="display:none"></div>
+      </div>
+    </div>
+    <!-- SETTINGS -->
+    <div class="page" id="page-settings">
+      <div class="page-header"><h1>设置</h1><p>配置默认推送选项</p></div>
+      <div class="card">
+        <div class="card-header"><h3>默认值</h3></div>
+        <div class="form-row">
+          <div class="form-group"><label class="form-label">默认服务器</label><input type="text" class="form-input" id="set-server" placeholder="https://api.day.app"></div>
+          <div class="form-group"><label class="form-label">默认铃声</label><select class="form-select" id="set-sound"><option value="">默认</option><option value="birdsong">birdsong</option><option value="alarm">alarm</option><option value="bell">bell</option><option value="success">success</option><option value="silence">silence</option></select></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label class="form-label">默认通知级别</label><select class="form-select" id="set-level"><option value="active">active</option><option value="timeSensitive">timeSensitive</option><option value="critical">critical</option><option value="passive">passive</option></select></div>
+          <div class="form-group"><label class="form-label">默认分组</label><input type="text" class="form-input" id="set-group" placeholder="分组名"></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header"><h3>行为</h3></div>
+        <div class="setting-item"><div class="setting-info"><h4>自动复制</h4><p>发送后自动复制内容到剪贴板</p></div><div class="toggle active" id="set-autocopy" onclick="this.classList.toggle('active')"></div></div>
+        <div class="setting-item"><div class="setting-info"><h4>保存记录</h4><p>保存推送历史到本地</p></div><div class="toggle active" id="set-savehistory" onclick="this.classList.toggle('active')"></div></div>
+      </div>
+      <button class="btn btn-primary" onclick="saveSettings()">保存设置</button>
+    </div>
+  </main>
+</div>
+<!-- Device Modal -->
+<div class="modal-overlay" id="device-modal">
+  <div class="modal">
+    <div class="modal-header"><h2 id="modal-title">添加设备</h2><p>配置 Bark 设备</p></div>
+    <div class="form-group"><label class="form-label">设备名称 *</label><input type="text" class="form-input" id="modal-name" placeholder="我的 iPhone"></div>
+    <div class="form-group"><label class="form-label">设备密钥 *</label><input type="text" class="form-input" id="modal-key" placeholder="Bark 设备密钥"><div class="form-hint">在 Bark 应用中点击复制密钥</div></div>
+    <div class="form-group"><label class="form-label">服务器地址</label><input type="text" class="form-input" id="modal-server" placeholder="https://api.day.app"><div class="form-hint">留空使用默认服务器</div></div>
+    <div class="form-group"><label class="form-label">加密密钥(可选)</label><input type="password" class="form-input" id="modal-enc-key" placeholder="AES 加密密钥"><div class="form-hint">设置后自动加密消息</div></div>
+    <div class="modal-footer"><button class="btn" onclick="closeModal()">取消</button><button class="btn" onclick="testModalDevice()">测试</button><button class="btn btn-primary" onclick="saveDevice()">保存</button></div>
+  </div>
+</div>
+<div class="toast-container" id="toast-container"></div>
+<script src="js/app.js"></script>
+</body>
+</html>
