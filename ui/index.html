@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <title>Bark Push</title>
+  <style>
+    :root{--bg:#fff;--bg2:#f5f5f7;--text:#1d1d1f;--muted:#86868b;--border:#d2d2d7;--input-bg:#f5f5f7;--accent:#6366f1;--success:#22c55e;--success-bg:rgba(34,197,94,.08);--error:#ef4444;--error-bg:rgba(239,68,68,.08);--radius:10px}
+    *{margin:0;padding:0;box-sizing:border-box}
+    body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:var(--bg2);color:var(--text);font-size:14px;height:100vh;overflow:hidden;-webkit-font-smoothing:antialiased}
+
+    .titlebar{height:38px;display:flex;align-items:center;justify-content:space-between;padding:0 12px;-webkit-app-region:drag;background:var(--bg);border-bottom:1px solid var(--border);position:fixed;top:0;left:0;right:0;z-index:100}
+    .titlebar-title{font-size:13px;font-weight:600;display:flex;align-items:center;gap:6px}
+    .titlebar-title .dot{width:8px;height:8px;border-radius:50%;background:var(--accent)}
+    .titlebar-controls{display:flex;gap:2px}
+    .tb-btn{width:36px;height:28px;display:flex;align-items:center;justify-content:center;border:none;background:0;color:var(--muted);cursor:pointer;border-radius:6px;-webkit-app-region:no-drag;transition:all .15s}
+    .tb-btn:hover{background:var(--bg2);color:var(--text)}
+    .tb-btn.close:hover{background:#ff5f57;color:#fff}
+
+    .main{margin-top:38px;height:calc(100vh - 38px);overflow-y:auto;display:flex;justify-content:center;padding:16px}
+    .main::-webkit-scrollbar{width:5px}
+    .main::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+    .card{width:100%;max-width:400px;display:flex;flex-direction:column;gap:14px}
+
+    .header{text-align:center;padding:4px 0}
+    .header-icon{width:48px;height:48px;border-radius:14px;background:linear-gradient(135deg,#6366f1,#8b5cf6);display:inline-flex;align-items:center;justify-content:center;margin-bottom:8px;box-shadow:0 4px 12px rgba(99,102,241,.25)}
+    .header-icon svg{width:24px;height:24px;color:#fff}
+    .header h1{font-size:17px;font-weight:700;letter-spacing:-.3px}
+    .header p{font-size:12px;color:var(--muted);margin-top:1px}
+
+    .field{display:flex;flex-direction:column;gap:4px}
+    .field-label{font-size:12px;font-weight:600;color:var(--muted)}
+    .input,.textarea,.select{width:100%;padding:9px 12px;background:var(--input-bg);border:1.5px solid var(--border);border-radius:var(--radius);color:var(--text);font-size:14px;font-family:inherit;outline:0;transition:border-color .2s}
+    .input:focus,.textarea:focus,.select:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(99,102,241,.1)}
+    .textarea{resize:none;min-height:80px;line-height:1.5}
+
+    .paste-btn{display:flex;align-items:center;justify-content:center;gap:5px;width:100%;padding:8px;background:var(--input-bg);border:1.5px dashed var(--border);border-radius:var(--radius);color:var(--muted);font-size:13px;font-family:inherit;cursor:pointer;transition:all .2s}
+    .paste-btn:hover{border-color:var(--accent);color:var(--accent)}
+    .paste-btn svg{width:14px;height:14px}
+
+    .send-btn{width:100%;padding:13px;border:none;border-radius:var(--radius);background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;font-size:15px;font-weight:600;font-family:inherit;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:transform .1s,box-shadow .2s;box-shadow:0 4px 12px rgba(99,102,241,.3)}
+    .send-btn:hover{transform:translateY(-1px);box-shadow:0 6px 16px rgba(99,102,241,.4)}
+    .send-btn:disabled{opacity:.5;cursor:not-allowed;transform:none}
+    .send-btn svg{width:17px;height:17px}
+    .spinner{width:17px;height:17px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite}
+    @keyframes spin{to{transform:rotate(360deg)}}
+
+    /* Toggle switch */
+    .toggle-row{display:flex;align-items:center;justify-content:space-between;padding:6px 0}
+    .toggle-label{font-size:12px;color:var(--muted);display:flex;align-items:center;gap:5px}
+    .toggle{position:relative;width:40px;height:22px;cursor:pointer}
+    .toggle input{opacity:0;width:0;height:0}
+    .toggle .slider{position:absolute;top:0;left:0;right:0;bottom:0;background:var(--border);border-radius:11px;transition:.2s}
+    .toggle .slider:before{content:'';position:absolute;width:18px;height:18px;left:2px;bottom:2px;background:#fff;border-radius:50%;transition:.2s;box-shadow:0 1px 3px rgba(0,0,0,.15)}
+    .toggle input:checked+.slider{background:var(--accent)}
+    .toggle input:checked+.slider:before{transform:translateX(18px)}
+
+    /* Advanced */
+    .adv-toggle{display:flex;align-items:center;gap:5px;font-size:12px;color:var(--muted);cursor:pointer;padding:2px 0;user-select:none;transition:color .2s}
+    .adv-toggle:hover{color:var(--text)}
+    .adv-toggle svg{width:11px;height:11px;transition:transform .2s}
+    .adv-toggle.open svg{transform:rotate(90deg)}
+    .adv-panel{display:none;flex-direction:column;gap:10px}
+    .adv-panel.show{display:flex}
+
+    .enc-field{display:none;flex-direction:column;gap:10px}
+    .enc-field.show{display:flex}
+    .enc-row{display:flex;gap:8px}
+    .enc-row .field{flex:1}
+
+    .result{padding:10px 12px;border-radius:var(--radius);font-size:13px;font-weight:500;display:none;align-items:center;gap:7px;animation:slideUp .3s ease}
+    .result.show{display:flex}
+    .result.ok{background:var(--success-bg);border:1px solid rgba(34,197,94,.2);color:var(--success)}
+    .result.fail{background:var(--error-bg);border:1px solid rgba(239,68,68,.2);color:var(--error)}
+    .result svg{width:14px;height:14px;flex-shrink:0}
+    @keyframes slideUp{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
+
+    .shortcut{text-align:center;font-size:11px;color:var(--muted);opacity:.5}
+    .shortcut kbd{background:var(--bg2);border:1px solid var(--border);border-radius:3px;padding:1px 4px;font-size:10px;font-family:inherit}
+
+    /* Debug */
+    .debug-bar{display:none;position:fixed;bottom:0;left:0;right:0;height:28px;background:#1e1e2e;color:#cdd6f4;font-family:'Cascadia Code',Consolas,monospace;font-size:11px;z-index:150;border-top:2px solid var(--accent);padding:4px 10px;overflow:hidden;cursor:pointer;transition:height .3s}
+    .debug-bar.show{display:flex;align-items:center;gap:8px}
+    .debug-bar.expanded{height:35vh;overflow-y:auto;cursor:default;flex-direction:column;align-items:stretch}
+    .debug-bar-header{display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+    .debug-bar-header span{color:#585b70;font-size:10px}
+    .debug-panel .log{padding:1px 0;border-bottom:1px solid rgba(255,255,255,.05)}
+    .debug-panel .log.info{color:#89b4fa}
+    .debug-panel .log.ok{color:#a6e3a1}
+    .debug-panel .log.err{color:#f38ba8}
+    .debug-panel .log .ts{color:#585b70;margin-right:5px}
+  </style>
+</head>
+<body>
+  <div class="titlebar">
+    <div class="titlebar-title"><span class="dot"></span>Bark Push</div>
+    <div class="titlebar-controls">
+      <button class="tb-btn" id="btn-min"><svg width="12" height="12" viewBox="0 0 12 12"><line x1="1" y1="6" x2="11" y2="6" stroke="currentColor" stroke-width="1.5"/></svg></button>
+      <button class="tb-btn" id="btn-max"><svg width="12" height="12" viewBox="0 0 12 12"><rect x="1" y="1" width="10" height="10" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.5"/></svg></button>
+      <button class="tb-btn close" id="btn-close"><svg width="12" height="12" viewBox="0 0 12 12"><line x1="2.5" y1="2.5" x2="9.5" y2="9.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><line x1="9.5" y1="2.5" x2="2.5" y2="9.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></button>
+    </div>
+  </div>
+
+  <div class="main">
+    <div class="card">
+      <div class="header">
+        <div class="header-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2L11 13"/><path d="M22 2L15 22L11 13L2 9L22 2Z"/></svg></div>
+        <h1>Bark Push</h1>
+        <p>快速推送消息到 iPhone</p>
+      </div>
+
+      <div class="field">
+        <div class="field-label">推送内容</div>
+        <textarea class="textarea" id="f-body" placeholder="输入要推送到手机的内容..."></textarea>
+      </div>
+
+      <button class="paste-btn" id="btn-paste">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+        从剪贴板粘贴
+      </button>
+
+      <button class="send-btn" id="btn-send">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2L11 13"/><path d="M22 2L15 22L11 13L2 9L22 2Z"/></svg>
+        发送推送
+      </button>
+
+      <!-- URL mode toggle -->
+      <div class="toggle-row">
+        <span class="toggle-label">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+          URL 模式 <span style="font-weight:400;opacity:.6">（GET 请求）</span>
+        </span>
+        <label class="toggle"><input type="checkbox" id="f-url-mode"><span class="slider"></span></label>
+      </div>
+      <div class="field" id="url-jump-field" style="display:none">
+        <div class="field-label">点击跳转 URL <span style="font-weight:400;opacity:.6">（点击通知打开此网址）</span></div>
+        <input type="text" class="input" id="f-url-jump" placeholder="https://www.example.com">
+      </div>
+
+      <div class="result" id="result">
+        <svg id="r-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"></svg>
+        <span id="r-msg"></span>
+      </div>
+
+      <div class="shortcut"><kbd>Ctrl</kbd> + <kbd>Enter</kbd> 发送</div>
+
+      <!-- Advanced -->
+      <div class="adv-toggle" id="adv-toggle">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+        高级选项
+      </div>
+      <div class="adv-panel" id="adv-panel">
+        <div class="field">
+          <div class="field-label">设备密钥</div>
+          <input type="text" class="input" id="f-key" placeholder="在 Bark 应用中复制你的设备密钥">
+        </div>
+        <div class="field">
+          <div class="field-label">服务器</div>
+          <input type="text" class="input" id="f-server" placeholder="https://api.day.app">
+        </div>
+        <div class="field">
+          <div class="field-label">点击跳转</div>
+          <input type="text" class="input" id="f-url" placeholder="https://example.com（可选）">
+        </div>
+        <div class="field">
+          <div class="field-label">铃声</div>
+          <select class="select" id="f-sound">
+            <option value="">默认</option>
+            <option value="birdsong">birdsong</option>
+            <option value="birdsong2">birdsong2</option>
+            <option value="alarm">alarm</option>
+            <option value="bell">bell</option>
+            <option value="bubble">bubble</option>
+            <option value="newemail">newemail</option>
+            <option value="silence">silence</option>
+            <option value="success">success</option>
+          </select>
+        </div>
+
+        <!-- Encryption -->
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-top:2px">
+          <button id="btn-enc" style="background:none;border:none;color:var(--muted);cursor:pointer;padding:4px 8px;border-radius:6px;display:flex;align-items:center;gap:4px;font-size:12px;font-family:inherit;transition:all .15s">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            加密
+          </button>
+        </div>
+        <div class="enc-field" id="enc-field">
+          <div class="enc-row">
+            <div class="field">
+              <div class="field-label">算法</div>
+              <select class="select" id="f-enc-algo">
+                <option value="AES128">AES-128</option>
+                <option value="AES192">AES-192</option>
+                <option value="AES256">AES-256</option>
+              </select>
+            </div>
+            <div class="field">
+              <div class="field-label">模式</div>
+              <select class="select" id="f-enc-mode">
+                <option value="CBC">CBC</option>
+                <option value="ECB">ECB</option>
+              </select>
+            </div>
+          </div>
+          <div class="field">
+            <div class="field-label">KEY <span id="key-hint" style="font-weight:400;opacity:.6">（16位）</span></div>
+            <input type="text" class="input" id="f-enc-key" placeholder="Bark 中设置的加密 KEY" maxlength="32">
+          </div>
+          <div class="field" id="iv-field">
+            <div class="field-label">IV <span id="iv-hint" style="font-weight:400;opacity:.6">（16位）</span></div>
+            <input type="text" class="input" id="f-enc-iv" placeholder="Bark 中设置的 IV" maxlength="16">
+          </div>
+        </div>
+
+        <!-- Close to tray -->
+        <div class="toggle-row">
+          <span class="toggle-label">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M18 6L6 18"/><path d="M6 6l12 12"/></svg>
+            关闭时最小化到任务栏
+          </span>
+          <label class="toggle"><input type="checkbox" id="f-tray"><span class="slider"></span></label>
+        </div>
+
+        <!-- Debug log toggle -->
+        <div class="toggle-row">
+          <span class="toggle-label">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+            显示调试日志
+          </span>
+          <label class="toggle"><input type="checkbox" id="f-debug"><span class="slider"></span></label>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="debug-bar" id="debug-bar">
+    <div class="debug-bar-header"><span>Debug Log (click to expand)</span></div>
+    <div id="debug-panel"></div>
+  </div>
+
+  <script>
+    window.onerror = function(msg, src, line) {
+      var el = document.getElementById('debug-panel');
+      if (el) { var d = document.createElement('div'); d.className = 'log err'; d.innerHTML = '<span class="ts">[ERR]</span>' + msg + ' L' + line; el.appendChild(d); }
+      return false;
+    };
+
+    var logs = [];
+    var debugEnabled = false;
+    function LOG(level, msg) {
+      if (!debugEnabled) return;
+      var now = new Date();
+      var ts = now.toLocaleTimeString('zh-CN',{hour12:false}) + '.' + String(now.getMilliseconds()).padStart(3,'0');
+      var el = document.getElementById('debug-panel');
+      var div = document.createElement('div');
+      div.className = 'log ' + level;
+      div.innerHTML = '<span class="ts">[' + ts + ']</span>' + msg;
+      el.appendChild(div);
+      var bar = document.getElementById('debug-bar');
+      if (bar.classList.contains('expanded')) bar.scrollTop = bar.scrollHeight;
+      logs.push({ts:ts, level:level, msg:msg});
+      console.log('[BP][' + level + '] ' + msg);
+    }
+
+    // Debug bar click to expand/collapse
+    document.getElementById('debug-bar').addEventListener('click', function(e) {
+      if (e.target.closest('.debug-bar-header') || !this.classList.contains('expanded')) {
+        this.classList.toggle('expanded');
+      }
+    });
+
+    LOG('info', 'Script loaded, waiting for Tauri...');
+
+    var invoke, W;
+
+    function waitForTauri(retries) {
+      if (window.__TAURI__) {
+        LOG('ok', '__TAURI__ found');
+        initApp();
+        return;
+      }
+      if (retries <= 0) {
+        LOG('err', '__TAURI__ not available after 10s');
+        showResult(false, 'Tauri API 加载失败');
+        return;
+      }
+      setTimeout(function() { waitForTauri(retries - 1); }, 500);
+    }
+    waitForTauri(20);
+
+    function initApp() {
+      try { invoke = window.__TAURI__.core.invoke; LOG('ok', 'invoke ready'); }
+      catch(e) { LOG('err', 'invoke failed: ' + e.message); return; }
+      try { W = window.__TAURI__.window.getCurrentWindow(); LOG('ok', 'Window handle OK'); }
+      catch(e) { LOG('err', 'Window failed: ' + e.message); }
+
+      // Window buttons
+      ['btn-min','btn-max','btn-close'].forEach(function(id) {
+        document.getElementById(id).addEventListener('click', function(e) {
+          e.stopPropagation(); e.preventDefault();
+          if (!W) return;
+          try {
+            if (id==='btn-min') W.minimize();
+            else if (id==='btn-max') W.toggleMaximize();
+            else if (id==='btn-close') W.close();
+          } catch(err) { LOG('err', id + ': ' + err.message); }
+        });
+      });
+
+      // Advanced toggle
+      document.getElementById('adv-toggle').addEventListener('click', function() {
+        this.classList.toggle('open');
+        document.getElementById('adv-panel').classList.toggle('show');
+      });
+
+      // Encryption toggle
+      var encVisible = false;
+      document.getElementById('btn-enc').addEventListener('click', function() {
+        encVisible = !encVisible;
+        document.getElementById('enc-field').classList.toggle('show', encVisible);
+        this.style.color = encVisible ? '#6366f1' : 'var(--muted)';
+      });
+
+      function updateEncHints() {
+        var algo = document.getElementById('f-enc-algo').value;
+        var mode = document.getElementById('f-enc-mode').value;
+        document.getElementById('key-hint').textContent = '（' + {AES128:16,AES192:24,AES256:32}[algo] + '位）';
+        document.getElementById('iv-hint').textContent = '（' + {CBC:16,ECB:0}[mode] + '位）';
+        document.getElementById('iv-field').style.display = mode === 'ECB' ? 'none' : 'flex';
+      }
+      document.getElementById('f-enc-algo').addEventListener('change', updateEncHints);
+      document.getElementById('f-enc-mode').addEventListener('change', updateEncHints);
+
+      // Debug toggle
+      document.getElementById('f-debug').addEventListener('change', function() {
+        debugEnabled = this.checked;
+        document.getElementById('debug-bar').classList.toggle('show', this.checked);
+        if (this.checked) { LOG('info', 'Debug logging enabled'); }
+      });
+
+      // URL mode toggle - show/hide URL jump field
+      document.getElementById('f-url-mode').addEventListener('change', function() {
+        document.getElementById('url-jump-field').style.display = this.checked ? 'flex' : 'none';
+      });
+
+      // Tray toggle - save immediately
+      document.getElementById('f-tray').addEventListener('change', function() {
+        invoke('save_settings', { settings: { closeToTray: this.checked } });
+      });
+
+      // Paste
+      document.getElementById('btn-paste').addEventListener('click', function() {
+        navigator.clipboard.readText().then(function(t) {
+          if (t) { document.getElementById('f-body').value = t; document.getElementById('result').className = 'result'; }
+        }).catch(function() {});
+      });
+
+      // Load config
+      LOG('info', 'Loading config...');
+      invoke('get_config').then(function(cfg) {
+        LOG('ok', 'Config: key=' + (cfg.key ? cfg.key.substring(0,4)+'...' : 'empty'));
+        if (cfg.key) document.getElementById('f-key').value = cfg.key;
+        document.getElementById('f-server').value = cfg.server || 'https://api.day.app';
+        if (cfg.sound) document.getElementById('f-sound').value = cfg.sound;
+        if (cfg.draft) document.getElementById('f-body').value = cfg.draft;
+        if (cfg.enc_algorithm) document.getElementById('f-enc-algo').value = cfg.enc_algorithm;
+        if (cfg.enc_mode) document.getElementById('f-enc-mode').value = cfg.enc_mode;
+        if (cfg.enc_key) {
+          document.getElementById('f-enc-key').value = cfg.enc_key;
+          encVisible = true;
+          document.getElementById('enc-field').classList.add('show');
+          document.getElementById('btn-enc').style.color = '#6366f1';
+        }
+        if (cfg.enc_iv) document.getElementById('f-enc-iv').value = cfg.enc_iv;
+        if (cfg.close_to_tray) document.getElementById('f-tray').checked = true;
+        updateEncHints();
+      }).catch(function(e) { LOG('err', 'Config: ' + e); });
+
+      // Auto-save on blur
+      function autoSave() {
+        invoke('save_settings', { settings: {
+          key: document.getElementById('f-key').value.trim(),
+          server: document.getElementById('f-server').value.trim(),
+          sound: document.getElementById('f-sound').value,
+          encAlgorithm: document.getElementById('f-enc-algo').value,
+          encMode: document.getElementById('f-enc-mode').value,
+          encKey: document.getElementById('f-enc-key').value.trim(),
+          encIv: document.getElementById('f-enc-iv').value.trim(),
+        }});
+      }
+      ['f-key','f-server','f-enc-key','f-enc-iv'].forEach(function(id) {
+        document.getElementById(id).addEventListener('blur', autoSave);
+      });
+
+      // Auto-save draft
+      var dt = null;
+      document.getElementById('f-body').addEventListener('input', function() {
+        clearTimeout(dt); var v = this.value;
+        dt = setTimeout(function() { invoke('save_settings', { settings: { draft: v } }); }, 500);
+      });
+
+      // Ctrl+Enter
+      document.getElementById('f-body').addEventListener('keydown', function(e) {
+        if ((e.ctrlKey||e.metaKey) && e.key==='Enter') { e.preventDefault(); doSend(); }
+      });
+
+      // Send button
+      document.getElementById('btn-send').addEventListener('click', doSend);
+
+      LOG('ok', 'App ready!');
+    }
+
+    function showResult(ok, msg) {
+      var el = document.getElementById('result');
+      el.className = 'result show ' + (ok ? 'ok' : 'fail');
+      document.getElementById('r-icon').innerHTML = ok
+        ? '<path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>'
+        : '<circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/>';
+      document.getElementById('r-msg').textContent = msg;
+    }
+
+    function doSend() {
+      if (!invoke) { showResult(false, 'API 未就绪'); return; }
+      var key = document.getElementById('f-key').value.trim();
+      var body = document.getElementById('f-body').value.trim();
+      if (!key) { showResult(false, '请输入设备密钥（高级选项中）'); return; }
+      if (!body) { showResult(false, '请输入推送内容'); return; }
+
+      var btn = document.getElementById('btn-send');
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spinner"></span> 发送中...';
+      document.getElementById('result').className = 'result';
+
+      var encAlgo=null, encMode=null, encPad=null, encKey=null, encIv=null;
+      if (document.getElementById('enc-field').classList.contains('show')) {
+        encAlgo = document.getElementById('f-enc-algo').value;
+        encMode = document.getElementById('f-enc-mode').value;
+        encPad = 'pkcs7';
+        encKey = document.getElementById('f-enc-key').value.trim() || null;
+        encIv = document.getElementById('f-enc-iv').value.trim() || null;
+      }
+
+      var useUrlMode = document.getElementById('f-url-mode').checked;
+      // Use URL jump field when in URL mode, otherwise use advanced url field
+      var jumpUrl = useUrlMode
+        ? (document.getElementById('f-url-jump').value.trim() || null)
+        : (document.getElementById('f-url').value.trim() || null);
+      LOG('info', 'Send: mode=' + (useUrlMode ? 'URL' : 'JSON') + ', key=' + key.substring(0,4) + '..., url=' + (jumpUrl || 'none'));
+
+      invoke('send_push', {
+        key: key,
+        server: document.getElementById('f-server').value.trim(),
+        title: null,
+        body: body,
+        url: jumpUrl,
+        sound: document.getElementById('f-sound').value || null,
+        group: null,
+        useUrlMode: useUrlMode,
+        encAlgorithm: encAlgo, encMode: encMode, encPadding: encPad,
+        encKey: encKey, encIv: encIv
+      }).then(function(r) {
+        LOG(r.success ? 'ok' : 'err', 'Result: ' + r.message);
+        showResult(r.success, r.success ? '推送成功' : r.message);
+        if (r.success) {
+          document.getElementById('f-body').value = '';
+          invoke('save_settings', { settings: { draft: '' } });
+        }
+      }).catch(function(e) {
+        LOG('err', 'Push failed: ' + e);
+        showResult(false, '发送失败: ' + e);
+      }).finally(function() {
+        btn.disabled = false;
+        btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2L11 13"/><path d="M22 2L15 22L11 13L2 9L22 2Z"/></svg> 发送推送';
+      });
+    }
+  </script>
+</body>
+</html>
