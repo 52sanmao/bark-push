@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bark Push</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<!-- ── Title Bar ─────────────────────────────────── -->
+<div class="titlebar">
+  <div class="titlebar-title">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+    Bark Push
+  </div>
+  <div class="titlebar-controls">
+    <button class="titlebar-btn" id="btn-minimize" title="Minimize">
+      <svg width="12" height="12" viewBox="0 0 12 12"><line x1="1" y1="6" x2="11" y2="6" stroke="currentColor" stroke-width="1.5"/></svg>
+    </button>
+    <button class="titlebar-btn" id="btn-maximize" title="Maximize">
+      <svg width="12" height="12" viewBox="0 0 12 12"><rect x="1" y="1" width="10" height="10" rx="1" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>
+    </button>
+    <button class="titlebar-btn close" id="btn-close" title="Close">
+      <svg width="12" height="12" viewBox="0 0 12 12"><line x1="2" y1="2" x2="10" y2="10" stroke="currentColor" stroke-width="1.5"/><line x1="10" y1="2" x2="2" y2="10" stroke="currentColor" stroke-width="1.5"/></svg>
+    </button>
+  </div>
+</div>
+
+<!-- ── App Layout ────────────────────────────────── -->
+<div class="app">
+  <!-- Sidebar -->
+  <nav class="sidebar">
+    <div class="sidebar-header">
+      <h2>Navigation</h2>
+    </div>
+    <div class="nav">
+      <button class="nav-item active" data-page="push">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2L11 13"/><path d="M22 2L15 22L11 13L2 9L22 2Z"/></svg>
+        Push
+      </button>
+      <button class="nav-item" data-page="devices">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
+        Devices
+      </button>
+      <button class="nav-item" data-page="history">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        History
+      </button>
+      <button class="nav-item" data-page="encrypt">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        Encrypt
+      </button>
+      <button class="nav-item" data-page="settings">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        Settings
+      </button>
+    </div>
+    <div class="sidebar-footer">
+      <div class="device-count" id="device-count">No devices</div>
+    </div>
+  </nav>
+
+  <!-- Main Content -->
+  <main class="main">
+
+    <!-- ══ PUSH PAGE ═══════════════════════════════ -->
+    <div class="page active" id="page-push">
+      <div class="page-header">
+        <h1>Send Push</h1>
+        <p>Send push notifications to your devices via Bark</p>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <h3>Select Devices</h3>
+          <p>Choose which devices to send the notification to</p>
+        </div>
+        <div class="select-all-row">
+          <input type="checkbox" id="select-all-devices">
+          <label for="select-all-devices">Select all</label>
+        </div>
+        <div class="push-device-selector" id="push-device-list">
+          <div class="empty-state">
+            <p>No devices configured yet. Add a device first.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <h3>Message</h3>
+          <p>Compose your notification content</p>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Title</label>
+          <input type="text" class="form-input" id="push-title" placeholder="Notification title">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Subtitle</label>
+          <input type="text" class="form-input" id="push-subtitle" placeholder="Optional subtitle">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Body *</label>
+          <textarea class="form-textarea" id="push-body" placeholder="Notification content. Use \n for line breaks." rows="4"></textarea>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <h3>Options</h3>
+          <p>Configure notification behavior</p>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">URL</label>
+            <input type="text" class="form-input" id="push-url" placeholder="https://example.com">
+            <div class="form-hint">Open URL when tapped</div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Copy</label>
+            <input type="text" class="form-input" id="push-copy" placeholder="Text to copy">
+            <div class="form-hint">Copy to clipboard</div>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Sound</label>
+            <select class="form-select" id="push-sound">
+              <option value="">Default</option>
+              <option value="birdsong">birdsong</option>
+              <option value="birdsong2">birdsong2</option>
+              <option value="alarm">alarm</option>
+              <option value="bell">bell</option>
+              <option value="bubble">bubble</option>
+              <option value="cashregister">cashregister</option>
+              <option value="electronic">electronic</option>
+              <option value="falling">falling</option>
+              <option value="gotosleep">gotosleep</option>
+              <option value="healthnotification">healthnotification</option>
+              <option value="horn">horn</option>
+              <option value="lalala">lalala</option>
+              <option value="multiway_invitation">multiway_invitation</option>
+              <option value="newemail">newemail</option>
+              <option value="newsflash">newsflash</option>
+              <option value="silence">silence</option>
+              <option value="success">success</option>
+              <option value="system">system</option>
+              <option value="telephone">telephone</option>
+              <option value="tinkling">tinkling</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Level</label>
+            <select class="form-select" id="push-level">
+              <option value="">Default (active)</option>
+              <option value="active">active</option>
+              <option value="timeSensitive">timeSensitive</option>
+              <option value="critical">critical</option>
+              <option value="passive">passive</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Group</label>
+            <input type="text" class="form-input" id="push-group" placeholder="Notification group">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Icon</label>
+            <input type="text" class="form-input" id="push-icon" placeholder="https://example.com/icon.png">
+            <div class="form-hint">Custom icon URL (iOS 15+)</div>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label" style="display:flex;align-items:center;gap:8px;cursor:pointer">
+            <input type="checkbox" id="push-call" style="width:14px;height:14px;">
+            Call mode (ring for 30 seconds)
+          </label>
+        </div>
+      </div>
+
+      <div class="btn-group">
+        <button class="btn btn-primary" id="btn-send-push">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2L11 13"/><path d="M22 2L15 22L11 13L2 9L22 2Z"/></svg>
+          Send Push
+        </button>
+        <button class="btn" id="btn-clear-push">Clear</button>
+      </div>
+    </div>
+
+    <!-- ══ DEVICES PAGE ════════════════════════════ -->
+    <div class="page" id="page-devices">
+      <div class="page-header">
+        <h1>Devices</h1>
+        <p>Manage your Bark device keys</p>
+      </div>
+
+      <button class="btn btn-primary" id="btn-add-device" style="margin-bottom:16px">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Add Device
+      </button>
+
+      <div class="device-list" id="device-list">
+        <div class="empty-state">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
+          <h3>No devices</h3>
+          <p>Add a Bark device to get started</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ HISTORY PAGE ════════════════════════════ -->
+    <div class="page" id="page-history">
+      <div class="page-header">
+        <h1>History</h1>
+        <p>View your push notification history</p>
+      </div>
+
+      <div class="btn-group" style="margin-bottom:16px;margin-top:0">
+        <select class="form-select" id="history-filter" style="width:200px">
+          <option value="">All devices</option>
+        </select>
+        <button class="btn btn-destructive btn-sm" id="btn-clear-history">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+          Clear History
+        </button>
+      </div>
+
+      <div class="card" style="padding:0;overflow:hidden">
+        <table class="history-table">
+          <thead>
+            <tr>
+              <th>Status</th>
+              <th>Title</th>
+              <th>Body</th>
+              <th>Time</th>
+            </tr>
+          </thead>
+          <tbody id="history-body">
+            <tr>
+              <td colspan="4">
+                <div class="empty-state" style="padding:30px">
+                  <p>No push history</p>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ══ ENCRYPT PAGE ════════════════════════════ -->
+    <div class="page" id="page-encrypt">
+      <div class="page-header">
+        <h1>Encryption</h1>
+        <p>Encrypt and decrypt push messages using AES-256-CBC</p>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <h3>Encrypt</h3>
+          <p>Encrypt a message with your key</p>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Plaintext</label>
+          <textarea class="form-textarea" id="enc-plaintext" placeholder="Enter text to encrypt" rows="3"></textarea>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Encryption Key</label>
+          <input type="password" class="form-input" id="enc-key" placeholder="Enter encryption key">
+        </div>
+        <button class="btn btn-primary" id="btn-encrypt">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          Encrypt
+        </button>
+        <div class="encrypt-result" id="enc-result" style="display:none"></div>
+        <button class="btn btn-sm" id="btn-copy-encrypted" style="margin-top:8px;display:none">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+          Copy
+        </button>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <h3>Decrypt</h3>
+          <p>Decrypt a base64-encoded ciphertext</p>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Ciphertext (Base64)</label>
+          <textarea class="form-textarea" id="dec-ciphertext" placeholder="Enter base64 ciphertext" rows="3"></textarea>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Decryption Key</label>
+          <input type="password" class="form-input" id="dec-key" placeholder="Enter decryption key">
+        </div>
+        <button class="btn btn-primary" id="btn-decrypt">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          Decrypt
+        </button>
+        <div class="encrypt-result" id="dec-result" style="display:none"></div>
+      </div>
+    </div>
+
+    <!-- ══ SETTINGS PAGE ═══════════════════════════ -->
+    <div class="page" id="page-settings">
+      <div class="page-header">
+        <h1>Settings</h1>
+        <p>Configure default push options</p>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <h3>Defaults</h3>
+          <p>Default values for new push messages</p>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Default Server</label>
+            <input type="text" class="form-input" id="set-server" placeholder="https://api.day.app">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Default Sound</label>
+            <select class="form-select" id="set-sound">
+              <option value="">Default</option>
+              <option value="birdsong">birdsong</option>
+              <option value="birdsong2">birdsong2</option>
+              <option value="alarm">alarm</option>
+              <option value="bell">bell</option>
+              <option value="bubble">bubble</option>
+              <option value="success">success</option>
+              <option value="silence">silence</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Default Level</label>
+            <select class="form-select" id="set-level">
+              <option value="active">active</option>
+              <option value="timeSensitive">timeSensitive</option>
+              <option value="critical">critical</option>
+              <option value="passive">passive</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Default Group</label>
+            <input type="text" class="form-input" id="set-group" placeholder="Default group name">
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <h3>Behavior</h3>
+          <p>Application behavior settings</p>
+        </div>
+        <div class="setting-item">
+          <div class="setting-info">
+            <h4>Auto Copy</h4>
+            <p>Automatically copy response to clipboard</p>
+          </div>
+          <div class="toggle active" id="set-autocopy"></div>
+        </div>
+        <div class="setting-item">
+          <div class="setting-info">
+            <h4>Save History</h4>
+            <p>Save push notification history locally</p>
+          </div>
+          <div class="toggle active" id="set-savehistory"></div>
+        </div>
+      </div>
+
+      <button class="btn btn-primary" id="btn-save-settings">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+        Save Settings
+      </button>
+    </div>
+
+  </main>
+</div>
+
+<!-- ── Device Modal ──────────────────────────────── -->
+<div class="modal-overlay" id="device-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <h2 id="modal-title">Add Device</h2>
+      <p>Configure a Bark device for push notifications</p>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Device Name *</label>
+      <input type="text" class="form-input" id="modal-name" placeholder="My iPhone">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Device Key *</label>
+      <input type="text" class="form-input" id="modal-key" placeholder="Your Bark device key">
+      <div class="form-hint">Found in the Bark app: tap to copy the key</div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Server URL</label>
+      <input type="text" class="form-input" id="modal-server" placeholder="https://api.day.app">
+      <div class="form-hint">Leave empty for the default Bark server</div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Encryption Key (optional)</label>
+      <input type="password" class="form-input" id="modal-encrypt-key" placeholder="AES encryption key">
+      <div class="form-hint">If set, messages will be encrypted before sending</div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" id="modal-cancel">Cancel</button>
+      <button class="btn" id="modal-test">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+        Test
+      </button>
+      <button class="btn btn-primary" id="modal-save">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Toast Container ───────────────────────────── -->
+<div class="toast-container" id="toast-container"></div>
+
+<script src="js/app.js"></script>
+</body>
+</html>

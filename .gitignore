@@ -1,0 +1,12 @@
+# Dependencies
+node_modules/
+
+# Rust
+src-tauri/target/
+
+# Generated icons (keep originals)
+gen_icons.py
+
+# OS
+.DS_Store
+Thumbs.db
