@@ -82,17 +82,23 @@
     .history-item .h-icon{color:var(--muted);flex-shrink:0}
     .history-item .h-icon svg{width:12px;height:12px}
 
-    /* Debug */
-    .debug-bar{display:none;position:fixed;bottom:0;left:0;right:0;height:28px;background:#1e1e2e;color:#cdd6f4;font-family:'Cascadia Code',Consolas,monospace;font-size:11px;z-index:150;border-top:2px solid var(--accent);padding:4px 10px;overflow:hidden;cursor:pointer;transition:height .3s}
-    .debug-bar.show{display:flex;align-items:center;gap:8px}
-    .debug-bar.expanded{height:35vh;overflow-y:auto;cursor:default;flex-direction:column;align-items:stretch}
-    .debug-bar-header{display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
-    .debug-bar-header span{color:#a6adc8;font-size:10px}
-    .debug-panel .log{padding:1px 0;border-bottom:1px solid rgba(255,255,255,.05)}
-    .debug-panel .log.info{color:#89b4fa}
-    .debug-panel .log.ok{color:#a6e3a1}
-    .debug-panel .log.err{color:#f38ba8}
-    .debug-panel .log .ts{color:#585b70;margin-right:5px}
+    /* Debug floating window */
+    .debug-win{display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);width:420px;max-height:60vh;background:#1e1e2e;color:#cdd6f4;font-family:'Cascadia Code',Consolas,monospace;font-size:11px;z-index:200;border-radius:10px;box-shadow:0 8px 32px rgba(0,0,0,.4);flex-direction:column;overflow:hidden;border:1px solid rgba(255,255,255,.1)}
+    .debug-win.show{display:flex}
+    .debug-header{display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:#181825;border-bottom:1px solid rgba(255,255,255,.08);cursor:move;user-select:none}
+    .debug-header span{color:#a6adc8;font-size:11px;font-weight:600}
+    .debug-header button{background:0;border:0;color:#6c7086;cursor:pointer;padding:2px 6px;border-radius:4px;font-size:14px;line-height:1}
+    .debug-header button:hover{color:#f38ba8;background:rgba(255,255,255,.05)}
+    .debug-body{flex:1;overflow-y:auto;padding:6px 10px;max-height:50vh}
+    .debug-body::-webkit-scrollbar{width:4px}
+    .debug-body::-webkit-scrollbar-thumb{background:#45475a;border-radius:2px}
+    .debug-body .log{padding:2px 0;border-bottom:1px solid rgba(255,255,255,.03);line-height:1.4}
+    .debug-body .log.info{color:#89b4fa}
+    .debug-body .log.ok{color:#a6e3a1}
+    .debug-body .log.err{color:#f38ba8}
+    .debug-body .log .ts{color:#585b70;margin-right:5px}
+    .debug-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.2);z-index:199}
+    .debug-overlay.show{display:block}
   </style>
 </head>
 <body>
@@ -173,12 +179,13 @@
           </select>
         </div>
 
-        <!-- Encryption -->
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-top:2px">
-          <button id="btn-enc" style="background:none;border:none;color:var(--muted);cursor:pointer;padding:4px 8px;border-radius:6px;display:flex;align-items:center;gap:4px;font-size:12px;font-family:inherit;transition:all .15s">
+        <!-- Encryption toggle -->
+        <div class="toggle-row">
+          <span class="toggle-label">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-            加密
-          </button>
+            加密推送
+          </span>
+          <label class="toggle"><input type="checkbox" id="f-enc-toggle"><span class="slider"></span></label>
         </div>
         <div class="enc-field" id="enc-field">
           <div class="enc-row">
@@ -229,9 +236,13 @@
     </div>
   </div>
 
-  <div class="debug-bar" id="debug-bar">
-    <div class="debug-bar-header"><span>运行日志（点击展开）</span></div>
-    <div id="debug-panel"></div>
+  <div class="debug-overlay" id="debug-overlay"></div>
+  <div class="debug-win" id="debug-win">
+    <div class="debug-header" id="debug-drag">
+      <span>运行日志</span>
+      <button id="debug-close">✕</button>
+    </div>
+    <div class="debug-body" id="debug-panel"></div>
   </div>
 
   <script>
@@ -252,15 +263,18 @@
       div.className = 'log ' + level;
       div.innerHTML = '<span class="ts">[' + ts + ']</span>' + msg;
       el.appendChild(div);
-      var bar = document.getElementById('debug-bar');
-      if (bar.classList.contains('expanded')) bar.scrollTop = bar.scrollHeight;
+      el.scrollTop = el.scrollHeight;
       console.log('[BP][' + level + '] ' + msg);
     }
 
-    document.getElementById('debug-bar').addEventListener('click', function(e) {
-      if (e.target.closest('.debug-bar-header') || !this.classList.contains('expanded')) {
-        this.classList.toggle('expanded');
-      }
+    // Debug window close
+    document.getElementById('debug-close').addEventListener('click', function() {
+      document.getElementById('debug-win').classList.remove('show');
+      document.getElementById('debug-overlay').classList.remove('show');
+    });
+    document.getElementById('debug-overlay').addEventListener('click', function() {
+      document.getElementById('debug-win').classList.remove('show');
+      this.classList.remove('show');
     });
 
     // History management
@@ -334,11 +348,9 @@
       });
 
       // Encryption toggle
-      var encVisible = false;
-      document.getElementById('btn-enc').addEventListener('click', function() {
-        encVisible = !encVisible;
-        document.getElementById('enc-field').classList.toggle('show', encVisible);
-        this.style.color = encVisible ? '#6366f1' : 'var(--muted)';
+      var encToggle = document.getElementById('f-enc-toggle');
+      encToggle.addEventListener('change', function() {
+        document.getElementById('enc-field').classList.toggle('show', this.checked);
       });
 
       function updateEncHints() {
@@ -354,7 +366,8 @@
       // Debug toggle
       document.getElementById('f-debug').addEventListener('change', function() {
         debugEnabled = this.checked;
-        document.getElementById('debug-bar').classList.toggle('show', this.checked);
+        document.getElementById('debug-win').classList.toggle('show', this.checked);
+        document.getElementById('debug-overlay').classList.toggle('show', this.checked);
         if (this.checked) { LOG('info', '日志已开启'); }
       });
 
@@ -380,9 +393,8 @@
         if (cfg.enc_mode) document.getElementById('f-enc-mode').value = cfg.enc_mode;
         if (cfg.enc_key) {
           document.getElementById('f-enc-key').value = cfg.enc_key;
-          encVisible = true;
+          encToggle.checked = true;
           document.getElementById('enc-field').classList.add('show');
-          document.getElementById('btn-enc').style.color = '#6366f1';
         }
         if (cfg.enc_iv) document.getElementById('f-enc-iv').value = cfg.enc_iv;
         if (cfg.close_to_tray) document.getElementById('f-tray').checked = true;
@@ -451,7 +463,7 @@
       document.getElementById('result').className = 'result';
 
       var encAlgo=null, encMode=null, encPad=null, encKey=null, encIv=null;
-      var encEnabled = document.getElementById('enc-field').classList.contains('show');
+      var encEnabled = document.getElementById('f-enc-toggle').checked;
       if (encEnabled) {
         encAlgo = document.getElementById('f-enc-algo').value;
         encMode = document.getElementById('f-enc-mode').value;
