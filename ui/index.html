@@ -301,8 +301,50 @@
       document.getElementById('debug-overlay').classList.remove('show');
     }
 
-    // Debug floating button
-    document.getElementById('debug-fab').addEventListener('click', openDebugWin);
+    // Debug floating button - draggable, left-click open, right-click close
+    (function() {
+      var fab = document.getElementById('debug-fab');
+      var dragging = false, moved = false;
+      var startX, startY, initX, initY;
+
+      fab.addEventListener('mousedown', function(e) {
+        if (e.button === 0) { // Left button - start drag
+          dragging = true; moved = false;
+          startX = e.clientX; startY = e.clientY;
+          var rect = fab.getBoundingClientRect();
+          initX = rect.left; initY = rect.top;
+          e.preventDefault();
+        }
+      });
+
+      document.addEventListener('mousemove', function(e) {
+        if (!dragging) return;
+        var dx = e.clientX - startX, dy = e.clientY - startY;
+        if (Math.abs(dx) > 3 || Math.abs(dy) > 3) moved = true;
+        var x = initX + dx, y = initY + dy;
+        x = Math.max(0, Math.min(window.innerWidth - 40, x));
+        y = Math.max(0, Math.min(window.innerHeight - 40, y));
+        fab.style.left = x + 'px';
+        fab.style.top = y + 'px';
+        fab.style.right = 'auto';
+        fab.style.bottom = 'auto';
+      });
+
+      document.addEventListener('mouseup', function(e) {
+        if (!dragging) return;
+        dragging = false;
+        if (!moved && e.button === 0) openDebugWin(); // Click = open
+      });
+
+      fab.addEventListener('contextmenu', function(e) { // Right-click = close
+        e.preventDefault();
+        debugEnabled = false;
+        fab.classList.remove('show');
+        closeDebugWin();
+        document.getElementById('f-debug').checked = false;
+      });
+    })();
+
     document.getElementById('debug-close').addEventListener('click', closeDebugWin);
     document.getElementById('debug-overlay').addEventListener('click', closeDebugWin);
 
