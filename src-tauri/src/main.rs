@@ -95,66 +95,53 @@ fn save_settings(settings: serde_json::Value) {
     save_config(&cfg);
 }
 
-fn encrypt_payload(json_str: &str, algorithm: &str, mode: &str, padding: &str, key: &str, iv: &str) -> Result<(String, Option<String>), String> {
+fn encrypt_payload(json_str: &str, mode: &str, key: &str, iv: &str) -> Result<(String, Option<String>), String> {
     use base64::{engine::general_purpose::STANDARD as B64, Engine};
     use aes::cipher::{block_padding, BlockEncryptMut, KeyInit, KeyIvInit};
 
-    let key_len = match algorithm {
-        "AES128" => 16, "AES192" => 24, "AES256" => 32,
-        _ => return Err(format!("Unknown algorithm: {}", algorithm)),
-    };
-    if key.len() != key_len {
-        return Err(format!("{} key must be {} characters", algorithm, key_len));
-    }
-
-    let need_iv = mode == "CBC";
-    if need_iv {
-        if iv.len() != 16 {
-            return Err("CBC mode IV must be 16 characters".to_string());
-        }
-    }
-
     let key_bytes = key.as_bytes();
+    let need_iv = mode == "CBC";
     let iv_bytes = if need_iv { iv.as_bytes() } else { &[0u8; 16][..] };
 
-    let ciphertext = match (algorithm, mode, padding) {
-        ("AES128", "CBC", "pkcs7") => {
+    // Match by key length to select AES variant (16=AES128, 24=AES192, 32=AES256)
+    let ciphertext = match (key_bytes.len(), mode) {
+        (16, "CBC") => {
             let enc = cbc::Encryptor::<aes::Aes128>::new(key_bytes.into(), iv_bytes.into());
             let mut buf = json_str.as_bytes().to_vec();
             let ct = enc.encrypt_padded_mut::<block_padding::Pkcs7>(&mut buf, json_str.len()).map_err(|e| format!("{:?}", e))?;
             B64.encode(ct)
         }
-        ("AES128", "ECB", "pkcs7") => {
-            let enc = ecb::Encryptor::<aes::Aes128>::new_from_slice(key_bytes).map_err(|e| format!("{:?}", e))?;
+        (16, "ECB") => {
+            let enc = ecb::Encryptor::<aes::Aes128>::new(key_bytes.into());
             let mut buf = json_str.as_bytes().to_vec();
             let ct = enc.encrypt_padded_mut::<block_padding::Pkcs7>(&mut buf, json_str.len()).map_err(|e| format!("{:?}", e))?;
             B64.encode(ct)
         }
-        ("AES192", "CBC", "pkcs7") => {
+        (24, "CBC") => {
             let enc = cbc::Encryptor::<aes::Aes192>::new(key_bytes.into(), iv_bytes.into());
             let mut buf = json_str.as_bytes().to_vec();
             let ct = enc.encrypt_padded_mut::<block_padding::Pkcs7>(&mut buf, json_str.len()).map_err(|e| format!("{:?}", e))?;
             B64.encode(ct)
         }
-        ("AES192", "ECB", "pkcs7") => {
-            let enc = ecb::Encryptor::<aes::Aes192>::new_from_slice(key_bytes).map_err(|e| format!("{:?}", e))?;
+        (24, "ECB") => {
+            let enc = ecb::Encryptor::<aes::Aes192>::new(key_bytes.into());
             let mut buf = json_str.as_bytes().to_vec();
             let ct = enc.encrypt_padded_mut::<block_padding::Pkcs7>(&mut buf, json_str.len()).map_err(|e| format!("{:?}", e))?;
             B64.encode(ct)
         }
-        ("AES256", "CBC", "pkcs7") => {
+        (32, "CBC") => {
             let enc = cbc::Encryptor::<aes::Aes256>::new(key_bytes.into(), iv_bytes.into());
             let mut buf = json_str.as_bytes().to_vec();
             let ct = enc.encrypt_padded_mut::<block_padding::Pkcs7>(&mut buf, json_str.len()).map_err(|e| format!("{:?}", e))?;
             B64.encode(ct)
         }
-        ("AES256", "ECB", "pkcs7") => {
-            let enc = ecb::Encryptor::<aes::Aes256>::new_from_slice(key_bytes).map_err(|e| format!("{:?}", e))?;
+        (32, "ECB") => {
+            let enc = ecb::Encryptor::<aes::Aes256>::new(key_bytes.into());
             let mut buf = json_str.as_bytes().to_vec();
             let ct = enc.encrypt_padded_mut::<block_padding::Pkcs7>(&mut buf, json_str.len()).map_err(|e| format!("{:?}", e))?;
             B64.encode(ct)
         }
-        _ => return Err(format!("Unsupported: {}-{}-{}", algorithm, mode, padding)),
+        _ => return Err(format!("KEY length must be 16/24/32 (got {})", key_bytes.len())),
     };
 
     let iv_param = if need_iv { Some(iv.to_string()) } else { None };
@@ -183,9 +170,7 @@ async fn send_push(
 
     if use_enc {
         // Encrypted mode always uses POST with ciphertext
-        let algo = enc_algorithm.as_deref().unwrap_or("AES128");
         let mode = enc_mode.as_deref().unwrap_or("CBC");
-        let pad = enc_padding.as_deref().unwrap_or("pkcs7");
         let ekey = enc_key.as_deref().unwrap_or("");
         let eiv = enc_iv.as_deref().unwrap_or("");
 
@@ -197,7 +182,7 @@ async fn send_push(
         if let Some(g) = &group { if !g.is_empty() { msg.insert("group".into(), serde_json::Value::String(g.clone())); } }
         let json_str = serde_json::to_string(&serde_json::Value::Object(msg)).unwrap();
 
-        match encrypt_payload(&json_str, algo, mode, pad, ekey, eiv) {
+        match encrypt_payload(&json_str, mode, ekey, eiv) {
             Ok((ciphertext, iv_param)) => {
                 let mut url_str = format!("{}/{}", server, key);
                 url_str.push_str("?ciphertext=");
