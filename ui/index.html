@@ -153,10 +153,6 @@
           <input type="text" class="input" id="f-server" placeholder="https://api.day.app">
         </div>
         <div class="field">
-          <div class="field-label">点击跳转</div>
-          <input type="text" class="input" id="f-url" placeholder="https://example.com（可选）">
-        </div>
-        <div class="field">
           <div class="field-label">铃声</div>
           <select class="select" id="f-sound">
             <option value="">默认</option>
@@ -430,15 +426,14 @@
       }
 
       var useUrlMode = document.getElementById('f-url-mode').checked;
-      var jumpUrl = document.getElementById('f-url').value.trim() || null;
-      LOG('info', 'Send: mode=' + (useUrlMode ? 'URL' : 'JSON') + ', key=' + key.substring(0,4) + '..., url=' + (jumpUrl || 'none'));
+      LOG('info', 'Send: mode=' + (useUrlMode ? 'URL' : 'JSON') + ', key=' + key.substring(0,4) + '...');
 
       invoke('send_push', {
         key: key,
         server: document.getElementById('f-server').value.trim(),
         title: null,
         body: body,
-        url: jumpUrl,
+        url: null,
         sound: document.getElementById('f-sound').value || null,
         group: null,
         useUrlMode: useUrlMode,
