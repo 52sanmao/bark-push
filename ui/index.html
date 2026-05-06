@@ -107,6 +107,11 @@
 
   <div class="main">
     <div class="card">
+      <div class="result" id="result">
+        <svg id="r-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"></svg>
+        <span id="r-msg"></span>
+      </div>
+
       <div class="field">
         <div class="field-label">推送内容</div>
         <textarea class="textarea" id="f-body" placeholder="输入要推送到手机的内容..."></textarea>
@@ -121,11 +126,6 @@
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2L11 13"/><path d="M22 2L15 22L11 13L2 9L22 2Z"/></svg>
         发送推送
       </button>
-
-      <div class="result" id="result">
-        <svg id="r-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"></svg>
-        <span id="r-msg"></span>
-      </div>
 
       <!-- URL mode toggle -->
       <div class="toggle-row">
