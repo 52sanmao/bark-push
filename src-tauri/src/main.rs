@@ -215,19 +215,19 @@ async fn send_push(
         }
     } else if use_url_mode {
         // URL mode: GET /key/title?params
-        // Title = user input (body field used as title in URL mode)
+        // Auto-add url param so clicking notification opens browser
         let title_enc = urlencoding::encode(&body);
 
         let mut url_str = format!("{}/{}/{}", server, key, title_enc);
 
         let mut params = vec![];
-        if let Some(u) = &url { if !u.is_empty() { params.push(format!("url={}", urlencoding::encode(u))); } }
+        // Auto-add jump URL: opens the Bark device page in browser
+        let jump_url = format!("{}/{}", server, key);
+        params.push(format!("url={}", urlencoding::encode(&jump_url)));
         if let Some(s) = &sound { if !s.is_empty() { params.push(format!("sound={}", urlencoding::encode(s))); } }
         if let Some(g) = &group { if !g.is_empty() { params.push(format!("group={}", urlencoding::encode(g))); } }
-        if !params.is_empty() {
-            url_str.push('?');
-            url_str.push_str(&params.join("&"));
-        }
+        url_str.push('?');
+        url_str.push_str(&params.join("&"));
 
         match client.get(&url_str).send().await {
             Ok(resp) => parse_response(resp).await,
