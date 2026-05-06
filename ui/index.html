@@ -131,11 +131,6 @@
         </span>
         <label class="toggle"><input type="checkbox" id="f-url-mode"><span class="slider"></span></label>
       </div>
-      <div class="field" id="url-jump-field" style="display:none">
-        <div class="field-label">点击跳转 URL <span style="font-weight:400;opacity:.6">（点击通知打开此网址）</span></div>
-        <input type="text" class="input" id="f-url-jump" placeholder="https://www.example.com">
-      </div>
-
       <div class="result" id="result">
         <svg id="r-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"></svg>
         <span id="r-msg"></span>
@@ -337,11 +332,6 @@
         if (this.checked) { LOG('info', 'Debug logging enabled'); }
       });
 
-      // URL mode toggle - show/hide URL jump field
-      document.getElementById('f-url-mode').addEventListener('change', function() {
-        document.getElementById('url-jump-field').style.display = this.checked ? 'flex' : 'none';
-      });
-
       // Tray toggle - save immediately
       document.getElementById('f-tray').addEventListener('change', function() {
         invoke('save_settings', { settings: { closeToTray: this.checked } });
@@ -440,10 +430,7 @@
       }
 
       var useUrlMode = document.getElementById('f-url-mode').checked;
-      // Use URL jump field when in URL mode, otherwise use advanced url field
-      var jumpUrl = useUrlMode
-        ? (document.getElementById('f-url-jump').value.trim() || null)
-        : (document.getElementById('f-url').value.trim() || null);
+      var jumpUrl = document.getElementById('f-url').value.trim() || null;
       LOG('info', 'Send: mode=' + (useUrlMode ? 'URL' : 'JSON') + ', key=' + key.substring(0,4) + '..., url=' + (jumpUrl || 'none'));
 
       invoke('send_push', {
