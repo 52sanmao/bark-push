@@ -87,7 +87,7 @@
     .debug-bar.show{display:flex;align-items:center;gap:8px}
     .debug-bar.expanded{height:35vh;overflow-y:auto;cursor:default;flex-direction:column;align-items:stretch}
     .debug-bar-header{display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
-    .debug-bar-header span{color:#585b70;font-size:10px}
+    .debug-bar-header span{color:#a6adc8;font-size:10px}
     .debug-panel .log{padding:1px 0;border-bottom:1px solid rgba(255,255,255,.05)}
     .debug-panel .log.info{color:#89b4fa}
     .debug-panel .log.ok{color:#a6e3a1}
@@ -230,7 +230,7 @@
   </div>
 
   <div class="debug-bar" id="debug-bar">
-    <div class="debug-bar-header"><span>Debug Log (click to expand)</span></div>
+    <div class="debug-bar-header"><span>运行日志（点击展开）</span></div>
     <div id="debug-panel"></div>
   </div>
 
@@ -355,7 +355,7 @@
       document.getElementById('f-debug').addEventListener('change', function() {
         debugEnabled = this.checked;
         document.getElementById('debug-bar').classList.toggle('show', this.checked);
-        if (this.checked) { LOG('info', 'Debug enabled'); }
+        if (this.checked) { LOG('info', '日志已开启'); }
       });
 
       // Tray toggle
@@ -451,16 +451,20 @@
       document.getElementById('result').className = 'result';
 
       var encAlgo=null, encMode=null, encPad=null, encKey=null, encIv=null;
-      if (document.getElementById('enc-field').classList.contains('show')) {
+      var encEnabled = document.getElementById('enc-field').classList.contains('show');
+      if (encEnabled) {
         encAlgo = document.getElementById('f-enc-algo').value;
         encMode = document.getElementById('f-enc-mode').value;
         encPad = 'pkcs7';
         encKey = document.getElementById('f-enc-key').value.trim() || null;
         encIv = document.getElementById('f-enc-iv').value.trim() || null;
+        LOG('info', '加密已开启: 算法=' + encAlgo + ' 模式=' + encMode);
+        LOG('info', '  KEY=' + (encKey ? encKey.length + '位' : '未设置'));
+        LOG('info', '  IV=' + (encIv ? encIv.length + '位' : '未设置'));
       }
 
       var useUrlMode = document.getElementById('f-url-mode').checked;
-      LOG('info', 'Send: mode=' + (useUrlMode ? 'URL' : 'JSON') + ', key=' + key.substring(0,4) + '...');
+      LOG('info', '发送: 模式=' + (useUrlMode ? 'URL(GET)' : 'JSON(POST)') + ' 密钥=' + key.substring(0,4) + '...');
 
       invoke('send_push', {
         key: key,
@@ -474,7 +478,7 @@
         encAlgorithm: encAlgo, encMode: encMode, encPadding: encPad,
         encKey: encKey, encIv: encIv
       }).then(function(r) {
-        LOG(r.success ? 'ok' : 'err', 'Result: ' + r.message);
+        LOG(r.success ? 'ok' : 'err', '服务器返回: ' + r.message);
         if (r.success) {
           // Success animation: button turns green for 1 second
           btn.className = 'send-btn success';
@@ -491,7 +495,7 @@
           showResult(false, r.message);
         }
       }).catch(function(e) {
-        LOG('err', 'Push failed: ' + e);
+        LOG('err', '发送异常: ' + e);
         showResult(false, '发送失败: ' + e);
       }).finally(function() {
         btn.disabled = false;

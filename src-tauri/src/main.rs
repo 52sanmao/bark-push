@@ -103,45 +103,67 @@ fn encrypt_payload(json_str: &str, mode: &str, key: &str, iv: &str) -> Result<(S
     let need_iv = mode == "CBC";
     let iv_bytes = if need_iv { iv.as_bytes() } else { &[0u8; 16][..] };
 
-    // Match by key length to select AES variant (16=AES128, 24=AES192, 32=AES256)
+    // Validate
+    if !matches!(key_bytes.len(), 16 | 24 | 32) {
+        return Err(format!("加密失败：KEY长度必须是16/24/32位（当前{}位）", key_bytes.len()));
+    }
+    if need_iv && iv_bytes.len() != 16 {
+        return Err(format!("加密失败：CBC模式IV必须是16位（当前{}位）", iv_bytes.len()));
+    }
+
+    let plaintext = json_str.as_bytes();
+    let bs = 16usize; // AES block size
+    let padded_len = ((plaintext.len() / bs) + 1) * bs;
+
     let ciphertext = match (key_bytes.len(), mode) {
         (16, "CBC") => {
             let enc = cbc::Encryptor::<aes::Aes128>::new(key_bytes.into(), iv_bytes.into());
-            let mut buf = json_str.as_bytes().to_vec();
-            let ct = enc.encrypt_padded_mut::<block_padding::Pkcs7>(&mut buf, json_str.len()).map_err(|e| format!("{:?}", e))?;
+            let mut buf = vec![0u8; padded_len];
+            buf[..plaintext.len()].copy_from_slice(plaintext);
+            let ct = enc.encrypt_padded_mut::<block_padding::Pkcs7>(&mut buf, plaintext.len())
+                .map_err(|e| format!("加密填充失败(PKCS7): {:?}", e))?;
             B64.encode(ct)
         }
-        (16, "ECB") => {
+        (16, _) => {
             let enc = ecb::Encryptor::<aes::Aes128>::new(key_bytes.into());
-            let mut buf = json_str.as_bytes().to_vec();
-            let ct = enc.encrypt_padded_mut::<block_padding::Pkcs7>(&mut buf, json_str.len()).map_err(|e| format!("{:?}", e))?;
+            let mut buf = vec![0u8; padded_len];
+            buf[..plaintext.len()].copy_from_slice(plaintext);
+            let ct = enc.encrypt_padded_mut::<block_padding::Pkcs7>(&mut buf, plaintext.len())
+                .map_err(|e| format!("加密填充失败(PKCS7): {:?}", e))?;
             B64.encode(ct)
         }
         (24, "CBC") => {
             let enc = cbc::Encryptor::<aes::Aes192>::new(key_bytes.into(), iv_bytes.into());
-            let mut buf = json_str.as_bytes().to_vec();
-            let ct = enc.encrypt_padded_mut::<block_padding::Pkcs7>(&mut buf, json_str.len()).map_err(|e| format!("{:?}", e))?;
+            let mut buf = vec![0u8; padded_len];
+            buf[..plaintext.len()].copy_from_slice(plaintext);
+            let ct = enc.encrypt_padded_mut::<block_padding::Pkcs7>(&mut buf, plaintext.len())
+                .map_err(|e| format!("加密填充失败(PKCS7): {:?}", e))?;
             B64.encode(ct)
         }
-        (24, "ECB") => {
+        (24, _) => {
             let enc = ecb::Encryptor::<aes::Aes192>::new(key_bytes.into());
-            let mut buf = json_str.as_bytes().to_vec();
-            let ct = enc.encrypt_padded_mut::<block_padding::Pkcs7>(&mut buf, json_str.len()).map_err(|e| format!("{:?}", e))?;
+            let mut buf = vec![0u8; padded_len];
+            buf[..plaintext.len()].copy_from_slice(plaintext);
+            let ct = enc.encrypt_padded_mut::<block_padding::Pkcs7>(&mut buf, plaintext.len())
+                .map_err(|e| format!("加密填充失败(PKCS7): {:?}", e))?;
             B64.encode(ct)
         }
         (32, "CBC") => {
             let enc = cbc::Encryptor::<aes::Aes256>::new(key_bytes.into(), iv_bytes.into());
-            let mut buf = json_str.as_bytes().to_vec();
-            let ct = enc.encrypt_padded_mut::<block_padding::Pkcs7>(&mut buf, json_str.len()).map_err(|e| format!("{:?}", e))?;
+            let mut buf = vec![0u8; padded_len];
+            buf[..plaintext.len()].copy_from_slice(plaintext);
+            let ct = enc.encrypt_padded_mut::<block_padding::Pkcs7>(&mut buf, plaintext.len())
+                .map_err(|e| format!("加密填充失败(PKCS7): {:?}", e))?;
             B64.encode(ct)
         }
-        (32, "ECB") => {
+        _ => {
             let enc = ecb::Encryptor::<aes::Aes256>::new(key_bytes.into());
-            let mut buf = json_str.as_bytes().to_vec();
-            let ct = enc.encrypt_padded_mut::<block_padding::Pkcs7>(&mut buf, json_str.len()).map_err(|e| format!("{:?}", e))?;
+            let mut buf = vec![0u8; padded_len];
+            buf[..plaintext.len()].copy_from_slice(plaintext);
+            let ct = enc.encrypt_padded_mut::<block_padding::Pkcs7>(&mut buf, plaintext.len())
+                .map_err(|e| format!("加密填充失败(PKCS7): {:?}", e))?;
             B64.encode(ct)
         }
-        _ => return Err(format!("KEY length must be 16/24/32 (got {})", key_bytes.len())),
     };
 
     let iv_param = if need_iv { Some(iv.to_string()) } else { None };
